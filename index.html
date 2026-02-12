@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Liquid State Machine</title>
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <div class="app">
+    <header>
+      <h1>Liquid State Machine</h1>
+      <p>Interconnected spiking neurons visualized in a brain-shaped reservoir.</p>
+    </header>
+
+    <main>
+      <canvas id="lsmCanvas" width="1100" height="700"></canvas>
+      <div class="controls">
+        <button id="toggleBtn">Pause</button>
+        <button id="resetBtn">Reset</button>
+        <label>
+          Spike Rate
+          <input id="spikeRate" type="range" min="0" max="100" value="35" />
+        </label>
+        <label>
+          Connectivity
+          <input id="connectivity" type="range" min="0" max="100" value="30" />
+        </label>
+        <label>
+          Fade
+          <input id="fade" type="range" min="0" max="100" value="45" />
+        </label>
+      </div>
+    </main>
+
+    <footer>
+      <span>Spikes glow brighter when neurons fire.</span>
+    </footer>
+  </div>
+
+  <script src="script.js"></script>
+</body>
+</html>
