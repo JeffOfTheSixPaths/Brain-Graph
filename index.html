@@ -8,23 +8,34 @@
 </head>
 <body>
   <div class="app">
-    <header>
-      <h1>Liquid State Machine</h1>
-      <p>Interconnected spiking neurons visualized in a brain-shaped reservoir.</p>
+    <header class="logo-header">
+      <img src="thor-logo.svg" alt="Thor logo" class="logo" />
     </header>
 
     <main>
-      <canvas id="lsmCanvas" width="1100" height="700"></canvas>
-      <div class="controls">
+      <div class="stage">
+        <canvas id="lsmCanvas" width="1100" height="700"></canvas>
+        <aside class="readout">
+          <div class="readout-group">
+            <span class="readout-label">Spike rate</span>
+            <span id="spikeRateDisplay" class="readout-value">0</span>
+          </div>
+          <div class="readout-group">
+            <span class="readout-label">People solved</span>
+            <span id="solvedCountDisplay" class="readout-value">0</span>
+          </div>
+        </aside>
+      </div>
+      <div class="controls is-hidden">
         <button id="toggleBtn">Pause</button>
         <button id="resetBtn">Reset</button>
         <label>
           Spike Rate
-          <input id="spikeRate" type="range" min="0" max="100" value="35" />
+          <input id="spikeRate" type="range" min="0" max="25" value="2" />
         </label>
         <label>
           Connectivity
-          <input id="connectivity" type="range" min="0" max="100" value="30" />
+          <input id="connectivity" type="range" min="0" max="10" value="3" />
         </label>
         <label>
           Fade
@@ -33,7 +44,7 @@
       </div>
     </main>
 
-    <footer>
+    <footer class=is-hidden>
       <span>Spikes glow brighter when neurons fire.</span>
     </footer>
   </div>

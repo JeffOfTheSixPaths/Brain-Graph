@@ -6,6 +6,8 @@ const resetBtn = document.getElementById("resetBtn");
 const spikeRateInput = document.getElementById("spikeRate");
 const connectivityInput = document.getElementById("connectivity");
 const fadeInput = document.getElementById("fade");
+const spikeRateDisplay = document.getElementById("spikeRateDisplay");
+const solvedCountDisplay = document.getElementById("solvedCountDisplay");
 
 const WIDTH = canvas.width;
 const HEIGHT = canvas.height;
@@ -21,6 +23,7 @@ let neurons = [];
 let connections = [];
 let running = true;
 let lastTime = 0;
+let solvedCount = 0;
 
 const rotation = {
   angleX: 0,
@@ -37,6 +40,10 @@ const settings = {
   connectivity: connectivityInput.value / 100,
   fade: fadeInput.value / 100,
 };
+
+const REQUEST_SOCKET_URL = "ws://localhost:8787";
+const MIN_SPIKE_STEP = 0.004;
+const MAX_SPIKE_RATE = 0.25;
 
 class Neuron {
   constructor(id, x, y, z, isExcitatory) {
@@ -78,6 +85,25 @@ class Neuron {
 }
 
 const randomInRange = (min, max) => min + Math.random() * (max - min);
+
+function setSpikeRate(value) {
+  const clamped = Math.max(0, Math.min(MAX_SPIKE_RATE, value));
+  settings.baseSpikeRate = clamped;
+  spikeRateInput.value = Math.round(clamped * 100);
+  if (spikeRateDisplay) {
+    const hz = Math.round(clamped * 100);
+    spikeRateDisplay.textContent = `${(hz/10) * 4}`;
+  }
+}
+
+function bumpSpikeRate(step = MIN_SPIKE_STEP) {
+  const delta = Math.max(step, MIN_SPIKE_STEP);
+  setSpikeRate(settings.baseSpikeRate + delta);
+  solvedCount += 0.5; // THIS HAS TO BE 0.5
+  if (solvedCountDisplay) {
+    solvedCountDisplay.textContent = `${solvedCount}`;
+  }
+}
 
 function isInBrainShape(x, y) {
   const dx = (x - CENTER_X) / (WIDTH * 0.32);
@@ -362,6 +388,34 @@ function resetNetwork() {
   generateConnections();
 }
 
+function initRequestListener() {
+  try {
+    const socket = new WebSocket(REQUEST_SOCKET_URL);
+
+    socket.addEventListener("message", (event) => {
+      //bumpSpikeRate(MIN_SPIKE_STEP);
+      const message = typeof event.data === "string" ? event.data : "";
+      if (message === "connect" || message === "bump") {
+        bumpSpikeRate(MIN_SPIKE_STEP);
+      }
+    });
+
+    socket.addEventListener("error", () => {
+      try {
+        socket.close();
+      } catch (error) {
+        // ignore
+      }
+    });
+
+    socket.addEventListener("close", () => {
+      setTimeout(initRequestListener, 2000);
+    });
+  } catch (error) {
+    setTimeout(initRequestListener, 2000);
+  }
+}
+
 toggleBtn.addEventListener("click", () => {
   running = !running;
   toggleBtn.textContent = running ? "Pause" : "Resume";
@@ -373,7 +427,7 @@ toggleBtn.addEventListener("click", () => {
 resetBtn.addEventListener("click", resetNetwork);
 
 spikeRateInput.addEventListener("input", (event) => {
-  settings.baseSpikeRate = event.target.value / 100;
+  setSpikeRate(event.target.value / 100);
 });
 
 connectivityInput.addEventListener("input", (event) => {
@@ -385,7 +439,13 @@ fadeInput.addEventListener("input", (event) => {
   settings.fade = event.target.value / 100;
 });
 
+setSpikeRate(settings.baseSpikeRate);
+if (solvedCountDisplay) {
+  solvedCountDisplay.textContent = `${solvedCount}`;
+}
 start();
+
+initRequestListener();
 
 canvas.addEventListener("mousedown", (event) => {
   rotation.dragging = true;
